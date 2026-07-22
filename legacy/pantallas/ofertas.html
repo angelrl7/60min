@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ofertas del día</title>
+  <link rel="stylesheet" href="../Style/styles.css" />
+  <style>
+    .oferta-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ef4444;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .fuera-horario {
+      max-width: 480px;
+      margin: 60px auto;
+      background: white;
+      border-radius: 20px;
+      padding: 48px 36px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+
+    .fuera-horario svg {
+      color: #f59e0b;
+      margin-bottom: 20px;
+    }
+
+    .fuera-horario h2 {
+      font-size: 1.4rem;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    .fuera-horario p {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .fuera-horario .hora-actual {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #6366f1;
+      margin: 20px 0 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fuera-horario .ventana {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    .card { position: relative; }
+
+    .precio-oferta {
+      color: #ef4444 !important;
+      font-weight: 700 !important;
+    }
+
+    .precio-original {
+      text-decoration: line-through;
+      color: #94a3b8 !important;
+      font-size: 0.85rem !important;
+      font-weight: 400 !important;
+      padding-bottom: 0 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="main-nav">
+    <div class="nav-left">
+      <img src="" alt="Logo" class="nav-logo" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='">
+      <span class="nav-brand">Ofertas del día</span>
+    </div>
+    <div class="nav-links">
+      <a href="../index.html">← Volver a la tienda</a>
+      <a href="carrito.html" class="cart-link">
+        Carrito
+        <span class="cart-count" id="cart-count">0</span>
+      </a>
+    </div>
+  </nav>
+
+  <h1>Ofertas del día</h1>
+
+  <div id="contenido"></div>
+
+  <script src="../JS/app.js"></script>
+  <script>
+    const contenido = document.getElementById('contenido');
+
+    function horaActual() {
+      return new Date().getHours();
+    }
+ //Cambia el horario de las ofertas 
+    function enVentanaOferta() {
+      const h = horaActual();
+      return h >= 20 && h < 22;
+    }
+
+    function agregarAlCarrito(id) {
+      const producto = productos.find(p => p.id === id);
+      if (!producto) return;
+
+      const carrito = getCarrito();
+      const existente = carrito.find(item => item.id === id);
+      const cantidadActual = existente ? existente.cantidad : 0;
+
+      if (producto.stock !== undefined && producto.stock !== null) {
+        if (cantidadActual >= producto.stock) return;
+      }
+
+      if (existente) {
+        existente.cantidad++;
+      } else {
+        carrito.push({ id: producto.id, nombre: producto.nombre, precio: producto.precioOferta ?? producto.precio, imagen: producto.imagen, cantidad: 1 });
+      }
+
+      setCarrito(carrito);
+
+      const btn = document.querySelector(`[data-id="${id}"]`);
+      if (btn) {
+        btn.textContent = '¡Agregado!';
+        btn.classList.add('btn-agregado');
+        setTimeout(() => {
+          btn.textContent = 'Agregar';
+          btn.classList.remove('btn-agregado');
+        }, 1200);
+      }
+    }
+
+    function renderHoraActual() {
+      const ahora = new Date();
+      const h = String(ahora.getHours()).padStart(2, '0');
+      const m = String(ahora.getMinutes()).padStart(2, '0');
+      const s = String(ahora.getSeconds()).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function render() {
+      if (!enVentanaOferta()) {
+        contenido.innerHTML = `
+          <div class="fuera-horario">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <h2>Las ofertas no están disponibles ahora</h2>
+            <p>Volvé entre las <strong>17:00</strong> y las <strong>18:00</strong> para ver los productos en oferta.</p>
+            <div class="hora-actual" id="reloj">${renderHoraActual()}</div>
+            <span class="ventana">Horario de ofertas: 17:00 – 18:00</span>
+          </div>`;
+
+        setInterval(() => {
+          const reloj = document.getElementById('reloj');
+          if (reloj) reloj.textContent = renderHoraActual();
+          if (enVentanaOferta()) render();
+        }, 1000);
+        return;
+      }
+
+      const ofertaProductos = productos.filter(p => p.oferta === true);
+
+      if (ofertaProductos.length === 0) {
+        contenido.innerHTML = `
+          <div class="fuera-horario">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            <h2>No hay ofertas disponibles</h2>
+            <p>El administrador aún no marcó ningún producto como oferta.</p>
+          </div>`;
+        return;
+      }
+
+      const grid = document.createElement('div');
+      grid.id = 'productos';
+
+      ofertaProductos.forEach(producto => {
+        const sinStock = producto.stock !== undefined && producto.stock !== null && producto.stock === 0;
+        const precioHTML = producto.precioOferta != null
+          ? `<p class="precio-original">$${producto.precio.toLocaleString('es-AR')}</p>
+             <p class="precio-oferta">$${producto.precioOferta.toLocaleString('es-AR')}</p>`
+          : `<p class="precio-oferta">$${producto.precio.toLocaleString('es-AR')}</p>`;
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <span class="oferta-badge">OFERTA</span>
+          <img src="${producto.imagen || `https://picsum.photos/seed/${producto.id}/400/300`}" alt="${producto.nombre}" onerror="this.src='https://picsum.photos/400/300'" />
+          <p>${producto.nombre}</p>
+          ${precioHTML}
+          <p>${producto.descripcion || ''}</p>
+          <button
+            class="btn-agregar${sinStock ? ' btn-sin-stock' : ''}"
+            data-id="${producto.id}"
+            onclick="agregarAlCarrito(${producto.id})"
+            ${sinStock ? 'disabled' : ''}
+          >${sinStock ? 'Sin stock' : 'Agregar'}</button>
+        `;
+        grid.appendChild(div);
+      });
+
+      contenido.innerHTML = '';
+      contenido.appendChild(grid);
+
+      // Auto-oculta cuando termina el horario
+      const msHastaFin = (() => {
+        const ahora = new Date();
+        const fin = new Date(ahora);
+        fin.setHours(18, 0, 0, 0);
+        return fin - ahora;
+      })();
+      if (msHastaFin > 0) {
+        setTimeout(() => render(), msHastaFin);
+      }
+    }
+
+    render();
+  </script>
+
+</body>
+</html>

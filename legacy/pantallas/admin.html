@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Panel de Administración</title>
+  <link rel="stylesheet" href="../Style/styles.css" />
+  <style>
+    /* ---- Botones del panel ---- */
+    .btn-edit {
+      flex: 1;
+      padding: 9px;
+      background: #ede9fe;
+      color: #42424b;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-edit:hover { background: #ddd6fe; }
+
+    .btn-logout {
+      padding: 8px 16px;
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-logout:hover { background: rgba(239, 68, 68, 0.3); color: #fecaca; }
+
+    /* ---- Etiqueta base/personalizado ---- */
+    .product-type-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-bottom: 4px;
+    }
+    .tag-base  { background: #f1f5f9; color: #64748b; }
+    .tag-extra { background: #ede9fe; color: #7c3aed; }
+
+    /* ---- Modal de edición ---- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+      background: white;
+      border-radius: 20px;
+      padding: 28px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+      animation: slideUp 0.22s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    .modal-header h2 { font-size: 1.1rem; font-weight: 700; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: #94a3b8;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      line-height: 1;
+    }
+    .modal-close:hover { color: #1e293b; background: #f1f5f9; }
+
+    /* ---- Toast ---- */
+    .toast {
+      display: none;
+      padding: 12px 16px;
+      background: #22c55e;
+      color: white;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      font-weight: 600;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    /* ---- Cards con posición relativa para el badge ---- */
+    .card { position: relative; }
+
+    /* ---- Tabs de fuente de imagen ---- */
+    .img-source-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .img-tab {
+      padding: 5px 16px;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.15s;
+    }
+    .img-tab.active {
+      background: #7c3aed;
+      color: white;
+      border-color: #7c3aed;
+    }
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 2px dashed #e2e8f0;
+      border-radius: 8px;
+      background: #f8fafc;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+    input[type="file"]:hover {
+      border-color: #7c3aed;
+      background: #f5f3ff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Verificación de sesión: se ejecuta antes del render -->
+  <script>
+    if (sessionStorage.getItem('admin_logged') !== 'true') {
+      window.location.replace('login.html');
+    }
+  </script>
+
+  <!-- NAV -->
+  <nav class="main-nav">
+    <div class="nav-left">
+      <img src="" alt="Logo" class="nav-logo" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='">
+      <span class="nav-brand">⚙ Admin</span>
+    </div>
+    <div class="nav-links">
+      <a href="../index.html">← Ver tienda</a>
+      <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <h1>Panel de Administración</h1>
+  <p class="subtitle">Gestioná todos tus productos desde acá</p>
+
+  <div class="layout">
+
+    
+    <div class="panel">
+      <h2>Nuevo Producto</h2>
+      <div class="toast" id="toast">¡Producto agregado con éxito!</div>
+
+      <form id="formProducto">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="nombre" placeholder="Ej: Auriculares Pro Max" required />
+        </div>
+
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="descripcion" placeholder="Descripción del producto..." required></textarea>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label>Precio ($)</label>
+            <input type="number" id="precio" placeholder="99.99" min="0" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <label>Stock <span>(opcional)</span></label>
+            <input type="number" id="stock" placeholder="Ej: 50" min="0" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label>Categoría <span>(opcional)</span></label>
+            <select id="categoria">
+              <option value="">Sin categoría</option>
+              <option value="Electrónica">Electrónica</option>
+              <option value="Accesorios">Accesorios</option>
+              <option value="Hogar">Hogar</option>
+              <option value="Deporte">Deporte</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Badge <span>(opcional)</span></label>
+            <input type="text" id="badge" placeholder="Oferta, Nuevo..." />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Imagen <span>(opcional)</span></label>
+          <div class="img-source-tabs">
+            <button type="button" class="img-tab active" id="imgTabUrl" onclick="switchImgTab('img', false)">Link</button>
+            <button type="button" class="img-tab" id="imgTabFile" onclick="switchImgTab('img', true)">Archivo</button>
+          </div>
+          <div id="imgUrlGroup">
+            <input type="url" id="imagenUrl" placeholder="https://..." />
+          </div>
+          <div id="imgFileGroup" style="display:none">
+            <input type="file" id="imagenArchivo" accept="image/*" />
+          </div>
+          <input type="hidden" id="imagen" />
+          <img id="preview" class="img-preview" alt="Vista previa" />
+        </div>
+
+        <div class="form-group" style="display:flex;align-items:center;gap:10px">
+          <input type="checkbox" id="oferta" style="width:auto;accent-color:#ef4444" onchange="togglePrecioOferta('', this.checked)" />
+          <label style="margin:0;text-transform:none;font-size:0.9rem;letter-spacing:0">Marcar como oferta <span>(visible 20–21 hs)</span></label>
+        </div>
+
+        <div class="form-group" id="grupoPrecioOferta" style="display:none">
+          <label>Precio oferta ($) <span>(el que se muestra en la pantalla de ofertas)</span></label>
+          <input type="number" id="precioOferta" placeholder="Ej: 79.99" min="0" step="0.01" />
+        </div>
+
+        <button type="submit" class="btn-submit">+ Agregar Producto</button>
+      </form>
+    </div>
+
+    <!-- LISTA DE TODOS LOS PRODUCTOS -->
+    <div>
+      <div class="list-header">
+        <h2>Todos los productos</h2>
+        <span class="badge-count" id="contador">0</span>
+      </div>
+      <div id="lista"></div>
+    </div>
+
+  </div>
+
+  <!-- MODAL: EDITAR PRODUCTO -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Editar Producto</h2>
+        <button type="button" class="modal-close" id="btnCerrar">✕</button>
+      </div>
+
+      <div class="toast" id="toastEdit">¡Producto actualizado con éxito!</div>
+
+      <form id="formEditar">
+        <input type="hidden" id="editId" />
+        <input type="hidden" id="editTipo" />
+
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="editNombre" required />
+        </div>
+
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="editDescripcion" required></textarea>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label>Precio ($)</label>
+            <input type="number" id="editPrecio" min="0" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <label>Stock <span>(opcional)</span></label>
+            <input type="number" id="editStock" min="0" placeholder="Sin límite" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label>Categoría <span>(opcional)</span></label>
+            <select id="editCategoria">
+              <option value="">Sin categoría</option>
+              <option value="Electrónica">Electrónica</option>
+              <option value="Accesorios">Accesorios</option>
+              <option value="Hogar">Hogar</option>
+              <option value="Deporte">Deporte</option>
+              <option value="Otro">Otro</option>
+              <option value="Personalizado">Personalizado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Badge <span>(opcional)</span></label>
+            <input type="text" id="editBadge" placeholder="Oferta, Nuevo..." />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Imagen <span>(opcional)</span></label>
+          <div class="img-source-tabs">
+            <button type="button" class="img-tab active" id="editTabUrl" onclick="switchImgTab('edit', false)">Link</button>
+            <button type="button" class="img-tab" id="editTabFile" onclick="switchImgTab('edit', true)">Archivo</button>
+          </div>
+          <div id="editUrlGroup">
+            <input type="url" id="editImagenUrl" placeholder="https://..." />
+          </div>
+          <div id="editFileGroup" style="display:none">
+            <input type="file" id="editImagenArchivo" accept="image/*" />
+          </div>
+          <input type="hidden" id="editImagen" />
+          <img id="editPreview" class="img-preview" alt="Vista previa" />
+        </div>
+
+        <div class="form-group" style="display:flex;align-items:center;gap:10px">
+          <input type="checkbox" id="editOferta" style="width:auto;accent-color:#ef4444" onchange="togglePrecioOferta('edit', this.checked)" />
+          <label style="margin:0;text-transform:none;font-size:0.9rem;letter-spacing:0">Marcar como oferta <span>(visible 20–21 hs)</span></label>
+        </div>
+
+        <div class="form-group" id="editGrupoPrecioOferta" style="display:none">
+          <label>Precio oferta ($) <span>(el que se muestra en la pantalla de ofertas)</span></label>
+          <input type="number" id="editPrecioOferta" placeholder="Ej: 79.99" min="0" step="0.01" />
+        </div>
+
+        <button type="submit" class="btn-submit">Guardar cambios</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="../JS/app.js"></script>
+  <script>
+    const KEY_EXTRA  = 'productos_extra';
+    const KEY_EDITS  = 'productos_base_edits';
+
+    /* ---------- helpers de localStorage ---------- */
+    function getExtra() {
+      return JSON.parse(localStorage.getItem(KEY_EXTRA) || '[]');
+    }
+    function saveExtra(lista) {
+      localStorage.setItem(KEY_EXTRA, JSON.stringify(lista));
+    }
+    function getBaseEdits() {
+      return JSON.parse(localStorage.getItem(KEY_EDITS) || '{}');
+    }
+    function saveBaseEdits(edits) {
+      localStorage.setItem(KEY_EDITS, JSON.stringify(edits));
+    }
+
+    /* Devuelve todos los productos combinados (base con edits + extra) */
+    function getTodosLosProductos() {
+      const edits = getBaseEdits();
+      const base  = productosBase.map(p => edits[p.id] ? { ...p, ...edits[p.id] } : p);
+      return [...base, ...getExtra()];
+    }
+
+    /* ---------- render lista ---------- */
+    function renderLista() {
+      const todos  = getTodosLosProductos();
+      const extra  = getExtra();
+      const extraIds = new Set(extra.map(p => p.id));
+
+      const contenedor = document.getElementById('lista');
+      document.getElementById('contador').textContent = todos.length;
+
+      if (todos.length === 0) {
+        contenedor.innerHTML = `
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="7" width="20" height="14" rx="2"/>
+              <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+            </svg>
+            <p>No hay productos cargados.</p>
+          </div>`;
+        return;
+      }
+
+      contenedor.innerHTML = `<div class="productos-grid">${
+        todos.map(p => {
+          const esExtra = extraIds.has(p.id);
+          const imgSrc  = p.imagen || `https://picsum.photos/seed/${p.id}/400/300`;
+          return `
+            <div class="card">
+              ${p.badge ? `<span class="card-badge">${p.badge}</span>` : ''}
+              <img src="${imgSrc}" alt="${p.nombre}" onerror="this.src='https://picsum.photos/400/300'" />
+              <div class="card-body">
+                <span class="product-type-tag ${esExtra ? 'tag-extra' : 'tag-base'}">
+                  ${esExtra ? 'Personalizado' : 'Base'}
+                </span>
+                <div class="card-nombre">${p.nombre}</div>
+                <div class="card-precio">$${p.precio.toLocaleString('es-AR')}</div>
+                <div class="card-desc">${p.descripcion || ''}</div>
+                <div style="display:flex;gap:8px;margin-top:12px">
+                  <button class="btn-edit" onclick="abrirModal(${p.id})">Editar</button>
+                  ${esExtra
+                    ? `<button class="btn-delete" onclick="eliminar(${p.id})">Eliminar</button>`
+                    : ''}
+                </div>
+              </div>
+            </div>`;
+        }).join('')
+      }</div>`;
+    }
+
+    /* ---------- eliminar (solo extra) ---------- */
+    function eliminar(id) {
+      if (!confirm('¿Eliminar este producto?')) return;
+      saveExtra(getExtra().filter(p => p.id !== id));
+      renderLista();
+    }
+
+    /* ---------- modal de edición ---------- */
+    function abrirModal(id) {
+      const todos = getTodosLosProductos();
+      const p     = todos.find(x => x.id === id);
+      if (!p) return;
+
+      const esBase = productosBase.some(x => x.id === id);
+
+      document.getElementById('editId').value       = p.id;
+      document.getElementById('editTipo').value     = esBase ? 'base' : 'extra';
+      document.getElementById('editNombre').value   = p.nombre       || '';
+      document.getElementById('editDescripcion').value = p.descripcion || '';
+      document.getElementById('editPrecio').value   = p.precio       ?? '';
+      document.getElementById('editStock').value    = p.stock != null ? p.stock : '';
+      document.getElementById('editBadge').value    = p.badge        || '';
+      document.getElementById('editImagen').value   = p.imagen       || '';
+      document.getElementById('editCategoria').value    = p.categoria   || '';
+      document.getElementById('editOferta').checked    = p.oferta === true;
+      document.getElementById('editPrecioOferta').value = p.precioOferta != null ? p.precioOferta : '';
+      togglePrecioOferta('edit', p.oferta === true);
+
+      // Si la imagen es un data URL (archivo subido), mostrar tab Archivo; si no, tab Link
+      if (p.imagen && p.imagen.startsWith('data:')) {
+        switchImgTab('edit', true);
+        document.getElementById('editImagenUrl').value = '';
+      } else {
+        switchImgTab('edit', false);
+        document.getElementById('editImagenUrl').value = p.imagen || '';
+      }
+
+      setPreview('editPreview', p.imagen || '');
+
+      document.getElementById('toastEdit').style.display = 'none';
+      document.getElementById('modalOverlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Cerrar al hacer clic en el fondo del overlay
+    document.getElementById('modalOverlay').addEventListener('click', function (e) {
+      if (e.target === this) cerrarModal();
+    });
+    document.getElementById('btnCerrar').addEventListener('click', cerrarModal);
+
+    /* ---------- campo precio oferta ---------- */
+    function togglePrecioOferta(prefix, mostrar) {
+      const grupoId = prefix ? `${prefix}GrupoPrecioOferta` : 'grupoPrecioOferta';
+      const inputId = prefix ? `${prefix}PrecioOferta` : 'precioOferta';
+      const grupo = document.getElementById(grupoId);
+      if (grupo) grupo.style.display = mostrar ? '' : 'none';
+      if (!mostrar) {
+        const input = document.getElementById(inputId);
+        if (input) input.value = '';
+      }
+    }
+
+    /* ---------- tabs de imagen ---------- */
+    function switchImgTab(form, showFile) {
+      document.getElementById(form + 'UrlGroup').style.display  = showFile ? 'none' : '';
+      document.getElementById(form + 'FileGroup').style.display = showFile ? ''     : 'none';
+      document.getElementById(form + 'TabUrl').classList.toggle('active', !showFile);
+      document.getElementById(form + 'TabFile').classList.toggle('active',  showFile);
+    }
+
+    function setPreview(previewId, src) {
+      const prev = document.getElementById(previewId);
+      if (src) {
+        prev.src           = src;
+        prev.style.display = 'block';
+        prev.onerror       = () => { prev.style.display = 'none'; };
+      } else {
+        prev.style.display = 'none';
+      }
+    }
+
+    // URL input del modal → hidden + preview
+    document.getElementById('editImagenUrl').addEventListener('input', function () {
+      document.getElementById('editImagen').value = this.value;
+      setPreview('editPreview', this.value);
+    });
+
+    // Archivo del modal → base64 → hidden + preview
+    document.getElementById('editImagenArchivo').addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('editImagen').value = e.target.result;
+        setPreview('editPreview', e.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    /* ---------- guardar edición ---------- */
+    document.getElementById('formEditar').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const id   = parseInt(document.getElementById('editId').value);
+      const tipo = document.getElementById('editTipo').value;
+
+      const stockVal = document.getElementById('editStock').value;
+      const editPOfertaVal = document.getElementById('editPrecioOferta').value;
+      const cambios = {
+        nombre:       document.getElementById('editNombre').value.trim(),
+        descripcion:  document.getElementById('editDescripcion').value.trim(),
+        precio:       parseFloat(document.getElementById('editPrecio').value),
+        stock:        stockVal !== '' ? parseInt(stockVal) : null,
+        badge:        document.getElementById('editBadge').value.trim()    || null,
+        imagen:       document.getElementById('editImagen').value.trim()   || null,
+        categoria:    document.getElementById('editCategoria').value       || null,
+        oferta:       document.getElementById('editOferta').checked,
+        precioOferta: editPOfertaVal !== '' ? parseFloat(editPOfertaVal) : null,
+      };
+
+      if (tipo === 'base') {
+        const edits = getBaseEdits();
+        edits[id]   = { ...(edits[id] || {}), ...cambios };
+        saveBaseEdits(edits);
+      } else {
+        const extra = getExtra();
+        const idx   = extra.findIndex(p => p.id === id);
+        if (idx !== -1) {
+          extra[idx] = { ...extra[idx], ...cambios };
+          saveExtra(extra);
+        }
+      }
+
+      const toast = document.getElementById('toastEdit');
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+        cerrarModal();
+        renderLista();
+      }, 1400);
+    });
+
+    /* ---------- preview imagen al agregar ---------- */
+    document.getElementById('imagenUrl').addEventListener('input', function () {
+      document.getElementById('imagen').value = this.value;
+      setPreview('preview', this.value);
+    });
+
+    document.getElementById('imagenArchivo').addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('imagen').value = e.target.result;
+        setPreview('preview', e.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    /* ---------- agregar nuevo producto ---------- */
+    document.getElementById('formProducto').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const extra   = getExtra();
+      const nuevoId = extra.length > 0 ? Math.max(...extra.map(p => p.id)) + 1 : 1000;
+
+      const stockVal = document.getElementById('stock').value;
+      const pOfertaVal = document.getElementById('precioOferta').value;
+      const producto = {
+        id:           nuevoId,
+        nombre:       document.getElementById('nombre').value.trim(),
+        descripcion:  document.getElementById('descripcion').value.trim(),
+        precio:       parseFloat(document.getElementById('precio').value),
+        categoria:    document.getElementById('categoria').value || null,
+        imagen:       document.getElementById('imagen').value.trim()  || null,
+        badge:        document.getElementById('badge').value.trim()   || null,
+        stock:        stockVal !== '' ? parseInt(stockVal) : null,
+        oferta:       document.getElementById('oferta').checked,
+        precioOferta: pOfertaVal !== '' ? parseFloat(pOfertaVal) : null,
+      };
+
+      extra.push(producto);
+      saveExtra(extra);
+      renderLista();
+
+      this.reset();
+      document.getElementById('preview').style.display = 'none';
+      switchImgTab('img', false);
+      togglePrecioOferta('', false);
+
+      const toast = document.getElementById('toast');
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    });
+
+
+    /* ---------- logout ---------- */
+    function logout() {
+      sessionStorage.removeItem('admin_logged');
+      window.location.href = 'login.html';
+    }
+
+    /* ---------- inicio ---------- */
+    renderLista();
+  </script>
+
+</body>
+</html>

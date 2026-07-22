@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrito</title>
+  <link rel="stylesheet" href="../Style/styles.css" />
+</head>
+<body>
+
+  <nav class="main-nav">
+    <div class="nav-left">
+      <img src="" alt="Logo" class="nav-logo" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='">
+      <span class="nav-brand">Carrito</span>
+    </div>
+    <div class="nav-links">
+      <a href="../index.html">← Volver a la tienda</a>
+    </div>
+  </nav>
+
+  <div class="carrito-container">
+    <div id="carrito-items"></div>
+    <div class="carrito-total" id="carrito-total"></div>
+  </div>
+
+  <script src="../JS/app.js"></script>
+  <script>
+    const contenedor = document.getElementById('carrito-items');
+    const totalEl    = document.getElementById('carrito-total');
+
+    function cambiarCantidad(id, delta) {
+      const carrito = getCarrito();
+      const item = carrito.find(i => i.id === id);
+      if (!item) return;
+
+      item.cantidad += delta;
+      if (item.cantidad <= 0) {
+        setCarrito(carrito.filter(i => i.id !== id));
+      } else {
+        setCarrito(carrito);
+      }
+      render();
+    }
+
+    function quitarItem(id) {
+      setCarrito(getCarrito().filter(i => i.id !== id));
+      render();
+    }
+
+    function vaciarCarrito() {
+      if (!confirm('¿Vaciar todo el carrito?')) return;
+      setCarrito([]);
+      render();
+    }
+
+    function render() {
+      const carrito = getCarrito();
+
+      if (carrito.length === 0) {
+        contenedor.innerHTML = `
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 01-8 0"/>
+            </svg>
+            <p>Tu carrito está vacío.</p>
+          </div>`;
+        totalEl.style.display = 'none';
+        return;
+      }
+
+      totalEl.style.display = 'flex';
+      let total = 0;
+
+      contenedor.innerHTML = carrito.map(item => {
+        const subtotal = item.precio * item.cantidad;
+        total += subtotal;
+        return `
+          <div class="carrito-item">
+            <img src="${item.imagen || `https://picsum.photos/seed/${item.id}/200/200`}" alt="${item.nombre}" onerror="this.src='https://picsum.photos/200/200'" />
+            <div class="carrito-item-info">
+              <p class="carrito-item-nombre">${item.nombre}</p>
+              <div class="qty-control">
+                <button class="qty-btn" onclick="cambiarCantidad(${item.id}, -1)" aria-label="Restar">−</button>
+                <span class="qty-num">${item.cantidad}</span>
+                <button class="qty-btn" onclick="cambiarCantidad(${item.id}, 1)" aria-label="Sumar">+</button>
+              </div>
+            </div>
+            <div class="carrito-item-right">
+              <p class="carrito-item-precio">$${subtotal.toLocaleString('es-AR')}</p>
+              <button class="btn-quitar" onclick="quitarItem(${item.id})">Quitar</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      totalEl.innerHTML = `
+        <span class="total-label">Total</span>
+        <span class="total-precio">$${total.toLocaleString('es-AR')}</span>
+        <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar</button>
+        <button class="btn-finalizar" onclick="finalizarCompra()">Finalizar compra</button>
+      `;
+    }
+
+    function finalizarCompra() {
+      const carrito = getCarrito();
+      if (carrito.length === 0) return;
+
+      let mensaje = '🛒 *Nuevo pedido:*\n\n';
+      let total = 0;
+
+      carrito.forEach(item => {
+        const subtotal = item.precio * item.cantidad;
+        total += subtotal;
+        mensaje += `• ${item.nombre} x${item.cantidad} — $${subtotal.toLocaleString('es-AR')}\n`;
+      });
+
+      mensaje += `\n*Total: $${total.toLocaleString('es-AR')}*`;
+
+      const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
+
+      setCarrito([]);
+      render();
+    }
+
+    render();
+  </script>
+
+</body>
+</html>

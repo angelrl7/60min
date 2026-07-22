@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Iniciar sesión</title>
+  <link rel="stylesheet" href="../Style/styles.css" />
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-logo {
+      text-align: center;
+      color: #6366f1;
+      margin-bottom: 1.5rem;
+    }
+
+    .login-title {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 0.3rem;
+    }
+
+    .login-sub {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+      margin: 0 0 2rem;
+    }
+
+    .login-error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .login-error.visible {
+      display: block;
+      animation: shake 0.35s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-8px); }
+      60%       { transform: translateX(8px); }
+      80%       { transform: translateX(-4px); }
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap input {
+      padding-right: 2.5rem;
+    }
+
+    .toggle-pw {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #94a3b8;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .toggle-pw:hover { color: #6366f1; }
+
+    .btn-login {
+      width: 100%;
+      padding: 0.8rem;
+      background: #64748b;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-login:hover  { background: #475569; }
+    .btn-login:active { transform: scale(0.98); }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.25rem;
+      color: #64748b;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover { color: #6366f1; }
+
+    .dev-hint {
+      margin-top: 1.5rem;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      font-size: 0.8rem;
+      color: #64748b;
+      text-align: center;
+    }
+
+    .dev-hint strong { color: #1e293b; }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+
+    <h1 class="login-title">Panel de Administración</h1>
+    <p class="login-sub">Ingresá tus credenciales para continuar</p>
+
+    <div class="login-error" id="loginError">Usuario o contraseña incorrectos.</div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Usuario</label>
+        <input type="text" id="usuario" placeholder="admin" autocomplete="username" required />
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="contrasena" placeholder="••••••••" autocomplete="current-password" required />
+          <button type="button" class="toggle-pw" id="togglePw" aria-label="Mostrar contraseña">
+            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-login">Ingresar al panel</button>
+    </form>
+
+    <a href="../index.html" class="back-link">← Volver a la tienda</a>
+
+    <div class="dev-hint">
+      <strong>Usuario:</strong> admin &nbsp;|&nbsp; 
+    </div>
+  </div>
+
+  <script>
+    // Si ya está logueado, redirigir directo al admin
+    if (sessionStorage.getItem('admin_logged') === 'true') {
+      window.location.href = 'admin.html';
+    }
+
+    // Toggle mostrar/ocultar contraseña
+    document.getElementById('togglePw').addEventListener('click', function () {
+      const input = document.getElementById('contrasena');
+      const icon  = document.getElementById('eyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>`;
+      } else {
+        input.type = 'password';
+        icon.innerHTML = `
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>`;
+      }
+    });
+
+    // Credenciales hardcodeadas (en producción real irían en el servidor)
+    const CREDS = { usuario: 'admin', contrasena: 'admin123' };
+
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const u = document.getElementById('usuario').value.trim();
+      const p = document.getElementById('contrasena').value;
+      const error = document.getElementById('loginError');
+
+      if (u === CREDS.usuario && p === CREDS.contrasena) {
+        sessionStorage.setItem('admin_logged', 'true');
+        window.location.href = 'admin.html';
+      } else {
+        error.classList.remove('visible');
+        void error.offsetWidth;
+        error.classList.add('visible');
+        document.getElementById('contrasena').value = '';
+        document.getElementById('contrasena').focus();
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>60min</title>
+  <link rel="stylesheet" href="Style/styles.css">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="main-nav">
+    <div class="nav-left">
+      <!-- Reemplazá src con la ruta de tu logo, ej: src="imagenes/logo.png" -->
+      <img src="" alt="Logo" class="nav-logo" src='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='">
+      <span class="nav-brand">60min</span>
+    </div>
+    <div class="nav-links">
+      <a href="productos.html">Productos</a>
+      <a href="pantallas/ofertas.html">Ofertas</a>
+      <a href="pantallas/carrito.html" class="cart-link">
+        Carrito
+        <span class="cart-count" id="cart-count">0</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Somos 60 min<br>Venta de ropa Deprotiva para toda la familia </h1>
+      <p class="hero-sub"> Parrafo de presentación</p>
+      <a href="productos.html" class="btn-ver-productos">Ver productos</a>
+    </div>
+  </section>
+
+  <!-- CARRUSEL -->
+  <section class="seccion-carrusel">
+    <h2 class="seccion-titulo">Nuestros Productos</h2>
+    <div class="carrusel">
+      <button class="carrusel-btn carrusel-prev" id="carrusel-prev">&#8592;</button>
+      <div class="carrusel-pista" id="carrusel-pista">
+        <img src="imagenes/Tabaco 1.webp" alt="Tabaco 1">
+        <img src="imagenes/OIP (1).webp" alt="Tabaco 2">
+        <img src="imagenes/tabaco2.webp" alt="Tabaco 3">
+      </div>
+      <button class="carrusel-btn carrusel-next" id="carrusel-next">&#8594;</button>
+    </div>
+    <div class="carrusel-dots">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+    <a href="productos.html" class="btn-ver-productos" style="margin-top:28px;">Ver catálogo completo</a>
+  </section>
+
+  <!-- POR QUÉ ELEGIRNOS -->
+  <section class="seccion-features">
+    <h2 class="seccion-titulo">¿Por qué elegirnos?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Calidad garantizada</h3>
+        <p>Productos seleccionados de las mejores marcas del mercado.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>Entrega rápida</h3>
+        <p>Recibí tu pedido en tiempo récord directamente en tu puerta.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>Atención por WhatsApp</h3>
+        <p>Consultanos cualquier duda directo por mensaje. ¡Respondemos rápido!</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>Mejores precios</h3>
+        <p>Precios competitivos y ofertas exclusivas para nuestros clientes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIOS -->
+  <section class="seccion-testimonios">
+    <h2 class="seccion-titulo">Lo que dicen nuestros clientes</h2>
+    <div class="testimonios-grid">
+      <div class="testimonio-card">
+        <div class="testimonio-estrellas">★★★★★</div>
+        <p class="testimonio-texto">"Excelente calidad, llegó todo en perfecto estado. Los voy a recomendar a todos mis amigos."</p>
+        <div class="testimonio-autor">
+          <div class="testimonio-avatar">M</div>
+          <div>
+            <strong>Martín G.</strong>
+            <span>Cliente frecuente</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonio-card">
+        <div class="testimonio-estrellas">★★★★★</div>
+        <p class="testimonio-texto">"Atención impecable por WhatsApp, respondieron al instante. Los precios son muy buenos."</p>
+        <div class="testimonio-autor">
+          <div class="testimonio-avatar">S</div>
+          <div>
+            <strong>Sofía R.</strong>
+            <span>Cliente nueva</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonio-card">
+        <div class="testimonio-estrellas">★★★★☆</div>
+        <p class="testimonio-texto">"Muy buen surtido de productos. Encontré todo lo que buscaba en un solo lugar."</p>
+        <div class="testimonio-autor">
+          <div class="testimonio-avatar">L</div>
+          <div>
+            <strong>Lucas P.</strong>
+            <span>Cliente frecuente</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAPA -->
+  <div class="mapa-section">
+    <h2 class="mapa-titulo">¿Dónde estamos?</h2>
+    <div class="mapa-wrapper">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1700.2552639727728!2d-68.53111245216407!3d-31.5376009175807!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9681410075748121%3A0x782e6bc02bd57"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+  </div>
+
+  <!-- CTA FINAL -->
+  <section class="seccion-cta">
+    <h2>¿Listo para hacer tu pedido?</h2>
+    <p>Explorá todo nuestro catálogo y encontrá lo que buscás.</p>
+    <a href="productos.html" class="btn-ver-productos">Ver todos los productos</a>
+  </section>
+
+  <script src="JS/app.js"></script>
+</body>
+</html>
