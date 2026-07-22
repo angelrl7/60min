@@ -122,10 +122,10 @@ export function Home() {
         <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-[0_6px_28px_rgba(15,23,42,0.1)]">
           <iframe
             title={`Ubicación de ${NOMBRE_TIENDA}`}
-            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1700.2552639727728!2d-68.53111245216407!3d-31.5376009175807!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9681410075748121%3A0x782e6bc02bd57"
+            src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1237.8506519728473!2d-68.57522704354369!3d-31.510455894175387!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses-419!2sar!4v1784744584776!5m2!1ses-419!2sar"
             className="h-[380px] w-full border-0"
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            referrerPolicy="strict-origin-when-cross-origin"
           />
         </div>
       </div>
