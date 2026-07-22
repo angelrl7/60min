@@ -31,11 +31,11 @@ export function Admin() {
 
   return (
     <>
-      <nav className="sticky top-0 z-40 mb-9 -mx-6 flex min-h-[70px] items-center justify-between border-b border-slate-200 bg-white/90 px-8 py-4 backdrop-blur-md sm:mx-0">
+      <nav className="sticky top-0 z-40 mb-9 -mx-6 flex min-h-[70px] flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white/90 px-5 py-4 backdrop-blur-md sm:mx-0 sm:px-8">
         <span className="inline-flex items-center gap-2 text-lg font-bold text-slate-900">
           <Settings size={18} className="text-brand-600" /> Admin
         </span>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 transition hover:text-brand-600">
             <ArrowLeft size={16} /> Ver tienda
           </Link>
