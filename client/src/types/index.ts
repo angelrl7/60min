@@ -9,6 +9,7 @@ export interface Product {
   stock: number | null;
   oferta: boolean;
   precio_oferta: number | null;
+  talles: string[] | null;
   created_at: string;
 }
 
@@ -16,11 +17,13 @@ export type ProductInput = Omit<Product, 'id' | 'created_at'>;
 
 export interface CartItem {
   id: string;
+  productoId: string;
   nombre: string;
   precio: number;
   imagen: string | null;
   cantidad: number;
   stock: number | null;
+  talle: string | null;
 }
 
 export interface Category {

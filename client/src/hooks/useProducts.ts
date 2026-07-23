@@ -54,8 +54,13 @@ export function useProducts() {
 }
 
 export async function descontarStock(items: { id: string; cantidad: number }[]) {
+  const cantidadPorProducto = new Map<string, number>();
+  for (const { id, cantidad } of items) {
+    cantidadPorProducto.set(id, (cantidadPorProducto.get(id) ?? 0) + cantidad);
+  }
+
   await Promise.all(
-    items.map(async ({ id, cantidad }) => {
+    Array.from(cantidadPorProducto.entries()).map(async ([id, cantidad]) => {
       const { data } = await supabase.from('products').select('stock').eq('id', id).single();
       if (!data || data.stock === null) return;
       const nuevoStock = Math.max(0, data.stock - cantidad);

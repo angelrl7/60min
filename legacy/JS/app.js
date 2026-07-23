@@ -1,5 +1,5 @@
 
-const WHATSAPP_NUMERO = '542645579914';
+const WHATSAPP_NUMERO = '5492644984710';
 
 const CATEGORIAS = ['Electrónica', 'Accesorios', 'Hogar', 'Deporte', 'Otro'];
 

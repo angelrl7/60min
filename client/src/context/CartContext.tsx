@@ -5,7 +5,13 @@ const CART_KEY = 'carrito';
 
 function leerCarrito(): CartItem[] {
   try {
-    return JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+    const items = JSON.parse(localStorage.getItem(CART_KEY) || '[]') as Partial<CartItem>[];
+    // Compatibilidad con carritos guardados antes de agregar talles.
+    return items.map((item) => ({
+      ...item,
+      productoId: item.productoId ?? item.id,
+      talle: item.talle ?? null,
+    })) as CartItem[];
   } catch {
     return [];
   }
@@ -15,7 +21,7 @@ interface CartContextValue {
   items: CartItem[];
   count: number;
   total: number;
-  addItem: (producto: Product, precioOverride?: number | null) => boolean;
+  addItem: (producto: Product, precioOverride?: number | null, talle?: string | null) => boolean;
   changeQty: (id: string, delta: number) => void;
   removeItem: (id: string) => void;
   clear: () => void;
@@ -30,29 +36,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(CART_KEY, JSON.stringify(items));
   }, [items]);
 
-  function addItem(producto: Product, precioOverride: number | null = null) {
+  function addItem(producto: Product, precioOverride: number | null = null, talle: string | null = null) {
     let agregado = false;
     setItems((actual) => {
-      const existente = actual.find((i) => i.id === producto.id);
-      const cantidadActual = existente ? existente.cantidad : 0;
+      const cartItemId = talle ? `${producto.id}::${talle}` : producto.id;
+      const cantidadTotalProducto = actual
+        .filter((i) => i.productoId === producto.id)
+        .reduce((acc, i) => acc + i.cantidad, 0);
 
-      if (producto.stock !== null && producto.stock !== undefined && cantidadActual >= producto.stock) {
+      if (producto.stock !== null && producto.stock !== undefined && cantidadTotalProducto >= producto.stock) {
         return actual;
       }
 
       agregado = true;
+      const existente = actual.find((i) => i.id === cartItemId);
       if (existente) {
-        return actual.map((i) => (i.id === producto.id ? { ...i, cantidad: i.cantidad + 1 } : i));
+        return actual.map((i) => (i.id === cartItemId ? { ...i, cantidad: i.cantidad + 1 } : i));
       }
       return [
         ...actual,
         {
-          id: producto.id,
+          id: cartItemId,
+          productoId: producto.id,
           nombre: producto.nombre,
           precio: precioOverride ?? producto.precio,
           imagen: producto.imagen,
           cantidad: 1,
           stock: producto.stock,
+          talle,
         },
       ];
     });
@@ -65,7 +76,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (!item) return actual;
       const nuevaCantidad = item.cantidad + delta;
       if (nuevaCantidad <= 0) return actual.filter((i) => i.id !== id);
-      if (item.stock !== null && nuevaCantidad > item.stock) return actual;
+
+      if (delta > 0 && item.stock !== null) {
+        const cantidadTotalProducto = actual
+          .filter((i) => i.productoId === item.productoId)
+          .reduce((acc, i) => acc + (i.id === id ? nuevaCantidad : i.cantidad), 0);
+        if (cantidadTotalProducto > item.stock) return actual;
+      }
+
       return actual.map((i) => (i.id === id ? { ...i, cantidad: nuevaCantidad } : i));
     });
   }

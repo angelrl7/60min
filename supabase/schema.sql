@@ -11,8 +11,12 @@ create table if not exists products (
   stock integer,
   oferta boolean not null default false,
   precio_oferta numeric(12, 2),
+  talles text[],
   created_at timestamptz not null default now()
 );
+
+-- Si la tabla ya existía (proyecto creado antes de agregar talles), esto la actualiza.
+alter table products add column if not exists talles text[];
 
 alter table products enable row level security;
 

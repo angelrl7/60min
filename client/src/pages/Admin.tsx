@@ -110,6 +110,18 @@ export function Admin() {
                       {p.stock === null ? 'Stock no controlado' : p.stock === 0 ? 'Sin stock' : `Stock: ${p.stock}`}
                     </div>
                     <div className="text-sm leading-relaxed text-slate-500">{p.descripcion}</div>
+                    {p.talles && p.talles.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {p.talles.map((talle) => (
+                          <span
+                            key={talle}
+                            className="rounded-md bg-slate-100 px-1.5 py-0.5 text-xs font-semibold text-slate-600"
+                          >
+                            {talle}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="mt-3 flex gap-2">
                       <Button onClick={() => setEditando(p)} variant="secondary" size="sm" className="flex-1">
                         Editar

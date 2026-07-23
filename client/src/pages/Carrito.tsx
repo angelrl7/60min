@@ -25,7 +25,8 @@ export function Carrito() {
     items.forEach((item) => {
       const subtotal = item.precio * item.cantidad;
       totalPedido += subtotal;
-      mensaje += `• ${item.nombre} x${item.cantidad} — $${subtotal.toLocaleString('es-AR')}\n`;
+      const talleTexto = item.talle ? ` (Talle: ${item.talle})` : '';
+      mensaje += `• ${item.nombre}${talleTexto} x${item.cantidad} — $${subtotal.toLocaleString('es-AR')}\n`;
     });
 
     mensaje += `\n*Total: $${totalPedido.toLocaleString('es-AR')}*`;
@@ -34,7 +35,7 @@ export function Carrito() {
     window.open(url, '_blank');
 
     try {
-      await descontarStock(items.map((item) => ({ id: item.id, cantidad: item.cantidad })));
+      await descontarStock(items.map((item) => ({ id: item.productoId, cantidad: item.cantidad })));
     } catch {
       // El pedido ya se envió por WhatsApp; si falla el descuento de stock no bloqueamos al cliente.
     }
@@ -67,6 +68,7 @@ export function Carrito() {
                 />
                 <div className="flex-1">
                   <p className="mb-1 font-bold text-slate-800">{item.nombre}</p>
+                  {item.talle && <p className="mb-1 text-xs font-semibold text-slate-500">Talle: {item.talle}</p>}
                   <div className="mt-1.5 flex items-center gap-2">
                     <button
                       onClick={() => changeQty(item.id, -1)}
