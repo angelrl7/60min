@@ -3,11 +3,8 @@ import { Nav } from '../components/Nav';
 import { Toolbar } from '../components/Toolbar';
 import { ProductCard } from '../components/ProductCard';
 import { EmptyState, IconCaja, IconLupa } from '../components/EmptyState';
-import { buttonVariants } from '../components/ui/Button';
-import { cn } from '../lib/cn';
+import { WhatsAppFloat } from '../components/WhatsAppFloat';
 import { useProducts } from '../hooks/useProducts';
-
-const WHATSAPP_NUMERO = import.meta.env.VITE_WHATSAPP_NUMERO;
 
 export function Productos() {
   const { productos, loading, error } = useProducts();
@@ -23,8 +20,6 @@ export function Productos() {
       return coincideTexto && coincideCat;
     });
   }, [productos, busqueda, categoria]);
-
-  const waHref = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent('Hola, quería hacer una consulta 🙂')}`;
 
   return (
     <>
@@ -51,11 +46,7 @@ export function Productos() {
         )}
       </div>
 
-      <div className="mt-4 text-center">
-        <a href={waHref} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: 'outline' }), 'mt-8')}>
-          Contactar por WhatsApp
-        </a>
-      </div>
+      <WhatsAppFloat />
     </>
   );
 }

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Award, Truck, MessageCircle, Wallet } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Carousel } from '../components/Carousel';
+import { WhatsAppFloat } from '../components/WhatsAppFloat';
 import { buttonVariants } from '../components/ui/Button';
 import { cn } from '../lib/cn';
 import { useSlides } from '../hooks/useSlides';
@@ -137,6 +138,8 @@ export function Home() {
           Ver todos los productos
         </Link>
       </section>
+
+      <WhatsAppFloat />
     </>
   );
 }
